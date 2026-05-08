@@ -111,7 +111,11 @@ impl AppState {
     pub async fn register_client(&self) -> (String, mpsc::UnboundedReceiver<ServerMessage>) {
         let client_id = Uuid::new_v4().to_string();
         let (sender, receiver) = mpsc::unbounded_channel();
-        self.runtime.clients.write().await.insert(client_id.clone(), sender);
+        self.runtime
+            .clients
+            .write()
+            .await
+            .insert(client_id.clone(), sender);
         (client_id, receiver)
     }
 
@@ -226,10 +230,7 @@ impl AppState {
                 .or_default()
                 .current_match_id = Some(match_id.clone());
             wallet_sessions.entry(wallet.clone()).or_default().ticket_id = None;
-            wallet_sessions
-                .entry(wallet)
-                .or_default()
-                .current_match_id = Some(match_id.clone());
+            wallet_sessions.entry(wallet).or_default().current_match_id = Some(match_id.clone());
 
             Ok(QueueJoinOutcome {
                 joined,
@@ -259,7 +260,10 @@ impl AppState {
         let mut removed_wallet = None;
 
         for entries in queue.values_mut() {
-            if let Some(index) = entries.iter().position(|entry| entry.ticket_id == ticket_id) {
+            if let Some(index) = entries
+                .iter()
+                .position(|entry| entry.ticket_id == ticket_id)
+            {
                 let removed = entries.remove(index).expect("queue index must exist");
                 removed_wallet = Some(removed.wallet);
                 break;
@@ -297,17 +301,19 @@ impl AppState {
         runtime.room_pubkey = Some(room_pubkey.clone());
         runtime.state = MatchLifecycle::RoomReady;
 
-        let room = rooms.entry(room_pubkey.clone()).or_insert_with(|| RoomRuntime {
-            room_pubkey: room_pubkey.clone(),
-            match_id: Some(match_id.to_string()),
-            wallets: BTreeSet::new(),
-            subscribers: BTreeSet::new(),
-            phase: RoomPhase::WaitingForPlayer,
-            turn_wallet: None,
-            updated_at: Utc::now(),
-            last_signature: None,
-            last_account_hash: None,
-        });
+        let room = rooms
+            .entry(room_pubkey.clone())
+            .or_insert_with(|| RoomRuntime {
+                room_pubkey: room_pubkey.clone(),
+                match_id: Some(match_id.to_string()),
+                wallets: BTreeSet::new(),
+                subscribers: BTreeSet::new(),
+                phase: RoomPhase::WaitingForPlayer,
+                turn_wallet: None,
+                updated_at: Utc::now(),
+                last_signature: None,
+                last_account_hash: None,
+            });
 
         room.match_id = Some(match_id.to_string());
         room.wallets.insert(runtime.creator_wallet.clone());
@@ -335,17 +341,19 @@ impl AppState {
         wallet: Option<String>,
     ) -> RoomRuntime {
         let mut rooms = self.runtime.rooms.lock().await;
-        let room = rooms.entry(room_pubkey.clone()).or_insert_with(|| RoomRuntime {
-            room_pubkey: room_pubkey.clone(),
-            match_id: None,
-            wallets: BTreeSet::new(),
-            subscribers: BTreeSet::new(),
-            phase: RoomPhase::WaitingForPlayer,
-            turn_wallet: None,
-            updated_at: Utc::now(),
-            last_signature: None,
-            last_account_hash: None,
-        });
+        let room = rooms
+            .entry(room_pubkey.clone())
+            .or_insert_with(|| RoomRuntime {
+                room_pubkey: room_pubkey.clone(),
+                match_id: None,
+                wallets: BTreeSet::new(),
+                subscribers: BTreeSet::new(),
+                phase: RoomPhase::WaitingForPlayer,
+                turn_wallet: None,
+                updated_at: Utc::now(),
+                last_signature: None,
+                last_account_hash: None,
+            });
         room.subscribers.insert(client_id);
         if let Some(wallet) = wallet {
             room.wallets.insert(wallet);
@@ -449,7 +457,11 @@ impl AppState {
         let preferred_room_pubkey = room_pubkey.or(session.current_room_pubkey);
         if let Some(room_pubkey) = preferred_room_pubkey {
             let room = self
-                .subscribe_room(client_id.to_string(), room_pubkey.clone(), Some(wallet.to_string()))
+                .subscribe_room(
+                    client_id.to_string(),
+                    room_pubkey.clone(),
+                    Some(wallet.to_string()),
+                )
                 .await;
             messages.push(ServerMessage::RoomState {
                 room_pubkey: room.room_pubkey.clone(),
@@ -509,7 +521,12 @@ impl AppState {
         }
     }
 
-    pub async fn handle_room_account_update(&self, room_pubkey: &str, account_hash: String, slot: u64) {
+    pub async fn handle_room_account_update(
+        &self,
+        room_pubkey: &str,
+        account_hash: String,
+        slot: u64,
+    ) {
         let snapshot = {
             let mut rooms = self.runtime.rooms.lock().await;
             let Some(room) = rooms.get_mut(room_pubkey) else {

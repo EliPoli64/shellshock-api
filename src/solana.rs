@@ -22,7 +22,8 @@ pub async fn spawn_room_observer(state: AppState, room_pubkey: String) {
         };
 
         loop {
-            if let Err(error) = observe_room_once(state.clone(), room_pubkey.clone(), parsed_room).await
+            if let Err(error) =
+                observe_room_once(state.clone(), room_pubkey.clone(), parsed_room).await
             {
                 warn!(%room_pubkey, %error, "room observer disconnected; retrying");
                 sleep(Duration::from_secs(3)).await;
@@ -104,7 +105,10 @@ async fn observe_room_once(state: AppState, room_pubkey: String, room: Pubkey) -
 
         match method {
             "accountNotification" => {
-                if let Some(result) = payload.get("params").and_then(|params| params.get("result")) {
+                if let Some(result) = payload
+                    .get("params")
+                    .and_then(|params| params.get("result"))
+                {
                     let slot = result
                         .get("context")
                         .and_then(|context| context.get("slot"))
@@ -122,7 +126,10 @@ async fn observe_room_once(state: AppState, room_pubkey: String, room: Pubkey) -
                 }
             }
             "logsNotification" => {
-                if let Some(result) = payload.get("params").and_then(|params| params.get("result")) {
+                if let Some(result) = payload
+                    .get("params")
+                    .and_then(|params| params.get("result"))
+                {
                     let slot = result
                         .get("context")
                         .and_then(|context| context.get("slot"))

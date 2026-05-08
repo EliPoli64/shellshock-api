@@ -56,7 +56,10 @@ pub enum ServerMessage {
         opponent_wallet: String,
     },
     #[serde(rename = "match.room_ready")]
-    MatchRoomReady { match_id: String, room_pubkey: String },
+    MatchRoomReady {
+        match_id: String,
+        room_pubkey: String,
+    },
     #[serde(rename = "room.state")]
     RoomState {
         room_pubkey: String,
