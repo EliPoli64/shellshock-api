@@ -1,1 +1,7 @@
 /target
+target/
+node_modules/
+dist/
+*.ts.map
+Anchor.toml.bak
+**/*.rs.bk

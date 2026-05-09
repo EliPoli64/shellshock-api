@@ -1,0 +1,16 @@
+[package]
+name = "shellshock"
+version = "0.1.0"
+description = "Shell Shock - turn-based duel game on Solana"
+edition = "2021"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[features]
+no-entrypoint = []
+cpi = []
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
